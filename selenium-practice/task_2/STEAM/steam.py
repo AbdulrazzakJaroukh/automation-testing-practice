@@ -121,27 +121,34 @@ class Steam(webdriver.Chrome):
         except:
             print("Element not found, check XPath of number of players area")
 
-    def choose_tag_action(self):
+    def click_see_all_if_exist(self):
         try:
             see_all_element = self.find_element(By.XPATH, const.first_see_all_XPath)
             if not see_all_element.get_attribute('style'):
                 see_all_element.click()
         except:
             print("Element not found, check XPath of first see-all")
+
+    def find_data_before_third_filter(self):
+        self.click_see_all_if_exist()
+        try:
+            WebDriverWait(self, 3).until(EC.url_to_be(const.URL_of_choosing_LAN_and_linux))
+        except:
+            print("check URL of choosing LAN and Linux")
+        try:
+            action_count_element = self.find_element(By.XPATH, const.action_count_XPath)
+            action_games_num = int(''.join(filter(str.isdigit, action_count_element.text)))
+            return action_games_num
+        except:
+            print("Element not found, check XPath or text of action count")
+
+    def choose_tag_action(self):
+        self.click_see_all_if_exist()
         try:
             tag_area = self.find_element(By.XPATH, const.tag_area_XPath)
             if str(tag_area.get_attribute('class')) == 'block search_collapse_block collapsed':
                 tag_area.click()
             try:
-                try:
-                    WebDriverWait(self, 3).until(EC.url_to_be(const.URL_of_choosing_LAN_and_linux))
-                except:
-                    print("check URL of choosing LAN and Linux")
-                try:
-                    action_count_element = self.find_element(By.XPATH, const.action_count_XPath)
-                    action_games_num = int(''.join(filter(str.isdigit, action_count_element.text)))
-                except:
-                    print("Element not found, check XPath or text of action count")
                 action_element = tag_area.find_element(By.XPATH, const.action_XPath)
                 action_element.click()
                 print("tag action has been chosen")
@@ -149,19 +156,26 @@ class Steam(webdriver.Chrome):
                 print("Element not found, check XPath of tag action")
         except:
             print("Element not found, check XPath of tag area")
+
+    def compare_num_of_games(self):
+        num1 = self.find_data_before_third_filter()
+        self.choose_tag_action()
         try:
+            WebDriverWait(self, 2).until(EC.url_to_be(const.URL_of_choosing_LAN_linux_action))
             try:
-                WebDriverWait(self, 2).until(EC.url_to_be(const.URL_of_choosing_LAN_linux_action))
+                search_results_element = self.find_element(By.XPATH, const.search_results_count_XPath)
+                num2 = int(''.join(filter(str.isdigit, search_results_element.text)))
+                try:
+                    if num1 == num2:
+                        print("Numbers of games coincide")
+                    else:
+                        print("Numbers of games --do not-- coincide")
+                except:
+                    print("one or more of results number non convertible to integer")
             except:
-                print("check URL of choosing LAN , Linux and action")
-            search_results_element = self.find_element(By.XPATH, const.search_results_count_XPath)
-            search_count = int(''.join(filter(str.isdigit, search_results_element.text)))
+                print("Element not found, check XPath search results")
         except:
-            print("Element not found, check XPath or text of search results")
-        if action_games_num == search_count:
-            print("Numbers of games coincide")
-        else:
-            print("Numbers of games --do not-- coincide")
+            print("check URL of choosing LAN , Linux and action")
 
     def get_info_first_result(self):
         try:

@@ -17,7 +17,7 @@ with Steam.getInsctance(False, Width, Height) as bot:
     bot.Go_to_Top_sellers()
     bot.choose_operating_system_Linux()
     bot.choose_number_of_players_LAN()
-    bot.choose_tag_action()
+    bot.compare_num_of_games()
     a, b, c = bot.get_info_first_result()
     print(a, b, c)
     bot.click_first_result((a, b, c))
